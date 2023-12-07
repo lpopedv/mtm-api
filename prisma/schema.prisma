@@ -1,0 +1,74 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(uuid()) @db.Uuid()
+  fullName      String    @db.VarChar(70)
+  email         String    @unique @db.VarChar(70)
+  password      String    @db.VarChar(255)
+  monthlyIncome Float
+  lastLogin     DateTime? @default(now())
+
+  insertedAt DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  Transaction Transaction[]
+  Category    Category[]
+
+  @@map("users")
+}
+
+model Category {
+  id          String  @id @default(uuid()) @db.Uuid()
+  userId      String  @db.Uuid()
+  title       String  @db.VarChar(70)
+  description String? @db.VarChar(255)
+
+  insertedAt DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  Transaction Transaction[]
+
+  @@map("categories")
+}
+
+enum TransactionType {
+  credit
+  debit
+}
+
+enum MovementType {
+  income
+  outgoing
+}
+
+model Transaction {
+  id                 String          @id @default(uuid()) @db.Uuid()
+  userId             String          @db.Uuid()
+  categoryId         String          @db.Uuid()
+  title              String          @db.VarChar(70)
+  transactionType    TransactionType
+  movementType       MovementType
+  amount             Float
+  description        String?         @db.Text()
+  isFixed            Boolean         @default(false)
+  installments       Int?
+  currentInstallment Int?
+  dueDate            DateTime?
+
+  insertedAt DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  category Category @relation(fields: [categoryId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@map("transactions")
+}
