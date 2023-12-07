@@ -1,36 +1,38 @@
+import { CategoryAlreadyExistsError } from '@/errors/categories/category-already-exists-error'
+import { CategoryNotFoundError } from '@/errors/categories/category-not-found-error'
 import { PrismaCategoryRepository } from '@/repositories/prisma/PrismaCategoryRepository'
 import { CreateCategoryUseCase } from '@/use-cases/categories/create-category.useCase'
 import { DeleteCategoryUseCase } from '@/use-cases/categories/delete-category.useCase'
 import { FindCategoryByIdUseCase } from '@/use-cases/categories/find-category-by-id.useCase'
 import { FindManyCategoryUseCase } from '@/use-cases/categories/find-many-category.useCase'
 import { UpdateCategoryUseCase } from '@/use-cases/categories/update-category.useCase'
+
 import { FastifyReply, FastifyRequest } from 'fastify'
+
 import { z } from 'zod'
 
 export class CategoryController {
   async findMany(request: FastifyRequest, reply: FastifyReply) {
     try {
-      await request.jwtVerify()
-
       const userId = request.user.sub
 
       const userRepository = new PrismaCategoryRepository()
-      const findManyUseCase = new FindManyCategoryUseCase(
+
+      const findManyCategoryUseCase = new FindManyCategoryUseCase(
         userRepository,
         userId,
       )
 
-      const getDataToTransactionFormSchema = z.object({
-        transactionForm: z.string().optional(),
+      const findManyRequestParamsSchema = z.object({
+        getCategoriesToTransactionSelectInput: z.string().optional(),
       })
 
-      const { transactionForm } = getDataToTransactionFormSchema.parse(
-        request.query,
-      )
+      const { getCategoriesToTransactionSelectInput } =
+        findManyRequestParamsSchema.parse(request.query)
 
-      if (transactionForm === 'true') {
-        const allCategories = await findManyUseCase.execute()
+      const allCategories = await findManyCategoryUseCase.execute()
 
+      if (getCategoriesToTransactionSelectInput === 'true') {
         const categoriesToTransactionForm = allCategories.map((category) => {
           return {
             value: category.id,
@@ -38,114 +40,130 @@ export class CategoryController {
           }
         })
 
-        return categoriesToTransactionForm
+        return reply.status(200).send(categoriesToTransactionForm)
       }
 
-      const allCategories = await findManyUseCase.execute()
-      return reply.send(allCategories)
+      return reply.status(200).send(allCategories)
     } catch (error) {
-      return reply.status(500).send(error)
+      return reply.status(500).send()
     }
   }
 
   async findById(request: FastifyRequest, reply: FastifyReply) {
-    await request.jwtVerify()
-
-    const userId = request.user.sub
-
-    const findByIdSchema = z.object({
-      id: z.string().uuid(),
-    })
-
-    const { id } = findByIdSchema.parse(request.params)
-
     try {
+      const userId = request.user.sub
+
+      const findByIdRequestParamsSchema = z.object({
+        id: z.string().uuid(),
+      })
+
+      const { id } = findByIdRequestParamsSchema.parse(request.params)
+
       const categoryRepository = new PrismaCategoryRepository()
-      const findByIdUseCase = new FindCategoryByIdUseCase(categoryRepository)
 
-      const category = await findByIdUseCase.execute(id, userId)
+      const findCategoryByIdUseCase = new FindCategoryByIdUseCase(
+        categoryRepository,
+        userId,
+      )
 
-      return reply.send(category)
+      const category = await findCategoryByIdUseCase.execute(id)
+
+      return reply.status(200).send(category)
     } catch (error) {
-      return reply.status(500).send(error)
+      return reply.status(500).send()
     }
   }
 
   async create(request: FastifyRequest, reply: FastifyReply) {
-    await request.jwtVerify()
-
-    const userId = request.user.sub
-
-    const createCategorySchema = z.object({
-      title: z.string().min(3).max(70),
-      description: z.string().min(3).max(255).optional(),
-    })
-
-    const { title, description } = createCategorySchema.parse(request.body)
-
     try {
-      const categoryRepository = new PrismaCategoryRepository()
-      const createUseCase = new CreateCategoryUseCase(categoryRepository)
+      const userId = request.user.sub
 
-      const newCategory = await createUseCase.execute({
+      const createCategoryBodySchema = z.object({
+        title: z.string().min(3).max(70),
+        description: z.string().min(3).max(255).optional(),
+      })
+
+      const { title, description } = createCategoryBodySchema.parse(
+        request.body,
+      )
+
+      const categoryRepository = new PrismaCategoryRepository()
+
+      const createCategoryUseCase = new CreateCategoryUseCase(
+        categoryRepository,
+        userId,
+      )
+
+      const category = await createCategoryUseCase.execute({
         title,
         userId,
         description,
       })
 
-      return reply.send(newCategory)
+      return reply.status(200).send(category)
     } catch (error) {
-      return reply.status(500).send(error)
+      if (error instanceof CategoryAlreadyExistsError)
+        return reply.status(409).send(error.message)
+
+      return reply.status(500).send()
     }
   }
 
   async update(request: FastifyRequest, reply: FastifyReply) {
-    await request.jwtVerify()
-
-    const userId = request.user.sub
-
-    const updateCategorySchema = z.object({
-      title: z.string().min(3).max(70),
-      description: z.string().min(3).max(255).optional(),
-    })
-
-    const uuidSchema = z.object({
-      id: z.string().uuid(),
-    })
-
-    const { id } = uuidSchema.parse(request.params)
-
-    const { title, description } = updateCategorySchema.parse(request.body)
-
     try {
-      const categoryRepository = new PrismaCategoryRepository()
-      const updateUseCase = new UpdateCategoryUseCase(categoryRepository)
+      const userId = request.user.sub
 
-      const updatedCategory = await updateUseCase.execute(id, {
+      const updateCategoryParamsSchema = z.object({
+        id: z.string().uuid(),
+      })
+
+      const { id } = updateCategoryParamsSchema.parse(request.params)
+
+      const updateCategoryBodySchema = z.object({
+        title: z.string().min(3).max(70),
+        description: z.string().min(3).max(255).optional(),
+      })
+
+      const { title, description } = updateCategoryBodySchema.parse(
+        request.body,
+      )
+
+      const categoryRepository = new PrismaCategoryRepository()
+
+      const updateCategoryUseCase = new UpdateCategoryUseCase(
+        categoryRepository,
+        userId,
+      )
+
+      const category = await updateCategoryUseCase.execute(id, {
         title,
         userId,
         description,
       })
 
-      return reply.send(updatedCategory)
+      return reply.status(200).send(category)
     } catch (error) {
-      return reply.status(500).send(error)
+      if (error instanceof CategoryNotFoundError)
+        return reply.status(404).send(error.message)
+
+      return reply.status(500).send()
     }
   }
 
   async delete(request: FastifyRequest, reply: FastifyReply) {
-    await request.jwtVerify()
-
-    const userId = request.user.sub
-
-    const uuidSchema = z.object({
-      id: z.string().uuid(),
-    })
-
-    const { id } = uuidSchema.parse(request.params)
-
     try {
+      await request.jwtVerify()
+
+      const userId = request.user.sub
+
+      const updateCategoryParamsSchema = z.object({
+        id: z.string().uuid(),
+      })
+
+      const { id } = updateCategoryParamsSchema.parse(request.params)
+
       const categoryRepository = new PrismaCategoryRepository()
+
       const deleteUseCase = new DeleteCategoryUseCase(
         categoryRepository,
         userId,
@@ -155,7 +173,10 @@ export class CategoryController {
 
       return reply.send(deletedCategory)
     } catch (error) {
-      return reply.status(500).send(error)
+      if (error instanceof CategoryNotFoundError)
+        return reply.status(404).send(error.message)
+
+      return reply.status(500).send()
     }
   }
 }

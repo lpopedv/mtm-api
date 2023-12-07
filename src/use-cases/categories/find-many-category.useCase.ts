@@ -3,13 +3,11 @@ import { CategoryRepository } from '@/interfaces/categories/category-repository.
 export class FindManyCategoryUseCase {
   constructor(
     private readonly categoryRepository: CategoryRepository,
-    private userId: string,
+    private readonly userId: string,
   ) {}
 
   async execute() {
-    const userId = this.userId
-    const categories = await this.categoryRepository.findMany(userId)
-
+    const categories = await this.categoryRepository.findMany(this.userId)
     return categories
   }
 }

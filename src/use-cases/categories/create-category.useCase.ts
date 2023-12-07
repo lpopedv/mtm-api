@@ -1,20 +1,31 @@
+import { Category } from '@/@types/category'
+import { CategoryAlreadyExistsError } from '@/errors/categories/category-already-exists-error'
 import { CategoryRepository } from '@/interfaces/categories/category-repository.interface'
 import { Prisma } from '@prisma/client'
 
 export class CreateCategoryUseCase {
-  constructor(private readonly categoryRepository: CategoryRepository) {}
+  constructor(
+    private readonly categoryRepository: CategoryRepository,
+    private readonly userId: string,
+  ) {}
 
   async execute({
     title,
     description,
-    userId,
-  }: Prisma.CategoryUncheckedCreateInput): Promise<Prisma.CategoryUncheckedCreateInput> {
-    const newCategory = await this.categoryRepository.create({
+  }: Category): Promise<Prisma.CategoryUncheckedCreateInput> {
+    const categoryExists = await this.categoryRepository.findByTitle(
       title,
-      userId,
+      this.userId,
+    )
+
+    if (categoryExists !== null) throw new CategoryAlreadyExistsError()
+
+    const category = await this.categoryRepository.create({
+      title,
+      userId: this.userId,
       description,
     })
 
-    return newCategory
+    return category
   }
 }

@@ -31,6 +31,19 @@ export class PrismaCategoryRepository implements CategoryRepository {
     return category
   }
 
+  async findByTitle(
+    title: string,
+    userId: string,
+  ): Promise<Prisma.CategoryUncheckedCreateInput | null> {
+    const category = await prismaClient.category.findFirst({
+      where: {
+        title,
+        userId,
+      },
+    })
+    return category
+  }
+
   async update(
     id: string,
     data: Prisma.CategoryUncheckedCreateInput,

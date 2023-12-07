@@ -1,6 +1,5 @@
-import { CategoryNotFoundError } from '@/errors/category-not-found-error'
+import { CategoryNotFoundError } from '@/errors/categories/category-not-found-error'
 import { CategoryRepository } from '@/interfaces/categories/category-repository.interface'
-import { Category } from '@prisma/client'
 
 export class DeleteCategoryUseCase {
   constructor(
@@ -8,16 +7,20 @@ export class DeleteCategoryUseCase {
     private userId: string,
   ) {}
 
-  async execute(id: string): Promise<Category> {
-    const userId = this.userId
-
-    const categoryExists = await this.categoryRepository.findById(id, userId)
+  async execute(id: string) {
+    const categoryExists = await this.categoryRepository.findById(
+      id,
+      this.userId,
+    )
 
     if (categoryExists === null) {
       throw new CategoryNotFoundError()
     }
 
-    const deletedCategory = await this.categoryRepository.delete(id, userId)
+    const deletedCategory = await this.categoryRepository.delete(
+      id,
+      this.userId,
+    )
 
     return deletedCategory
   }
