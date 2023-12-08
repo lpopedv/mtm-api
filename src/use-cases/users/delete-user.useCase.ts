@@ -4,7 +4,7 @@ import { UserRepository } from '@/interfaces/users/user-repository.interface'
 export class DeleteUserUseCase {
   constructor(private userRepository: UserRepository) {}
 
-  async execute(id: string): Promise<void> {
+  async execute(id: string) {
     const userExists = await this.userRepository.findById(id)
 
     if (userExists === null) {
