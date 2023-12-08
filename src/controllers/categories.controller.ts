@@ -70,6 +70,9 @@ export class CategoryController {
 
       return reply.status(200).send(category)
     } catch (error) {
+      if (error instanceof CategoryNotFoundError)
+        return reply.status(404).send(error.message)
+
       return reply.status(500).send()
     }
   }
