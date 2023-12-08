@@ -6,13 +6,13 @@ import { z } from 'zod'
 
 export class AuthenticateController {
   async authenticate(request: FastifyRequest, reply: FastifyReply) {
-    const authenticateBodySchema = z.object({
-      email: z.string().email(),
-      password: z.string().min(8),
-    })
-
     try {
-      const { email, password } = authenticateBodySchema.parse(request.body)
+      const authenticationBodySchema = z.object({
+        email: z.string().email(),
+        password: z.string().min(8),
+      })
+
+      const { email, password } = authenticationBodySchema.parse(request.body)
 
       const repository = new PrismaUserRepository()
       const useCase = new AuthenticateUseCase(repository)
@@ -37,8 +37,7 @@ export class AuthenticateController {
         return reply.status(401).send({ message: error.message })
       }
 
-      console.log(error)
-      return reply.status(500).send({ message: 'Internal server error' })
+      return reply.status(500).send()
     }
   }
 }
