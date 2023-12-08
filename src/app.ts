@@ -19,7 +19,7 @@ app.setErrorHandler((error, _, reply) => {
     // TODO: external log tool like DataDog/NewRelic/Sentry
   }
 
-  return reply.status(500).send({ message: 'Internal server error' })
+  return reply.status(500).send()
 })
 
 app.register(fastifyJwt, {

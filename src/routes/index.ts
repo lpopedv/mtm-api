@@ -1,8 +1,9 @@
-import { AuthenticateController } from '@/controllers/authenticate.controller'
-import { CategoryController } from '@/controllers/categories.controller'
-import { DashboardController } from '@/controllers/dashboard.controller'
-import { TransactionsController } from '@/controllers/transactions.controller'
-import { UserController } from '@/controllers/users.controller'
+import { AuthenticateController } from '@/http/controllers/authenticate.controller'
+import { CategoryController } from '@/http/controllers/categories.controller'
+import { DashboardController } from '@/http/controllers/dashboard.controller'
+import { TransactionsController } from '@/http/controllers/transactions.controller'
+import { UserController } from '@/http/controllers/users.controller'
+import { verifyJWT } from '@/http/middlewares/verify-jwt'
 import { FastifyInstance } from 'fastify'
 
 const usersController = new UserController()
@@ -14,23 +15,67 @@ const dashboardController = new DashboardController()
 export async function appRoutes(app: FastifyInstance) {
   app.post('/login', authenticateController.authenticate)
 
-  app.get('/users', usersController.findMany)
-  app.get('/users/:id', usersController.findById)
-  app.post('/users', usersController.create)
-  app.patch('/users/:id', usersController.update)
-  app.delete('/users/:id', usersController.delete)
+  app.get('/users', { onRequest: [verifyJWT] }, usersController.findMany)
+  app.get('/users/:id', { onRequest: [verifyJWT] }, usersController.findById)
+  app.post('/users', { onRequest: [verifyJWT] }, usersController.create)
+  app.patch('/users/:id', { onRequest: [verifyJWT] }, usersController.update)
+  app.delete('/users/:id', { onRequest: [verifyJWT] }, usersController.delete)
 
-  app.get('/categories', categoriesController.findMany)
-  app.get('/categories/:id', categoriesController.findById)
-  app.post('/categories', categoriesController.create)
-  app.patch('/categories/:id', categoriesController.update)
-  app.delete('/categories/:id', categoriesController.delete)
+  app.get(
+    '/categories',
+    { onRequest: [verifyJWT] },
+    categoriesController.findMany,
+  )
+  app.get(
+    '/categories/:id',
+    { onRequest: [verifyJWT] },
+    categoriesController.findById,
+  )
+  app.post(
+    '/categories',
+    { onRequest: [verifyJWT] },
+    categoriesController.create,
+  )
+  app.patch(
+    '/categories/:id',
+    { onRequest: [verifyJWT] },
+    categoriesController.update,
+  )
+  app.delete(
+    '/categories/:id',
+    { onRequest: [verifyJWT] },
+    categoriesController.delete,
+  )
 
-  app.get('/transactions', transactionsController.findMany)
-  app.get('/transactions/:id', transactionsController.findById)
-  app.post('/transactions', transactionsController.create)
-  app.patch('/transactions/:id', transactionsController.update)
-  app.delete('/transactions/:id', transactionsController.delete)
+  app.get(
+    '/transactions',
+    { onRequest: [verifyJWT] },
+    transactionsController.findMany,
+  )
+  app.get(
+    '/transactions/:id',
+    { onRequest: [verifyJWT] },
+    transactionsController.findById,
+  )
+  app.post(
+    '/transactions',
+    { onRequest: [verifyJWT] },
+    transactionsController.create,
+  )
+  app.patch(
+    '/transactions/:id',
+    { onRequest: [verifyJWT] },
+    transactionsController.update,
+  )
+  app.delete(
+    '/transactions/:id',
+    { onRequest: [verifyJWT] },
+    transactionsController.delete,
+  )
 
-  app.get('/getDashboardData', dashboardController.getDashboardData)
+  app.get(
+    '/getDashboardData',
+    { onRequest: [verifyJWT] },
+    dashboardController.getDashboardData,
+  )
 }

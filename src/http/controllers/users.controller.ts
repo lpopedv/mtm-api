@@ -16,12 +16,14 @@ import { UserNotFoundError } from '@/errors/user-not-found-error'
 import { UserAlreadyExistsError } from '@/errors/user-already-exists-error'
 
 export class UserController {
-  async findMany(_: FastifyRequest, reply: FastifyReply) {
+  async findMany(request: FastifyRequest, reply: FastifyReply) {
     try {
       const userRepository = new PrismaUserRepository()
       const findManyUseCase = new FindManyUserUseCase(userRepository)
 
       const allUsers = await findManyUseCase.execute()
+
+      console.log('chegou aqui')
 
       return reply.send(allUsers)
     } catch (error) {
