@@ -1,4 +1,4 @@
-import { CategoryNotFoundError } from '@/errors/category-not-found-error'
+import { CategoryNotFoundError } from '@/errors/categories/category-not-found-error'
 import { TransactionNotFoundError } from '@/errors/transaction-not-found-error'
 import { UserNotFoundError } from '@/errors/user-not-found-error'
 import { CategoryRepository } from '@/interfaces/categories/category-repository.interface'

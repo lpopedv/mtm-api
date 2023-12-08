@@ -7,8 +7,7 @@ export class FindManyTransactionUseCase {
   ) {}
 
   async execute() {
-    const userId = this.userId
-    const transactions = await this.transactionsRepository.findMany(userId)
+    const transactions = await this.transactionsRepository.findMany(this.userId)
     return transactions
   }
 }

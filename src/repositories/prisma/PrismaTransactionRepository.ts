@@ -8,19 +8,21 @@ export class PrismaTransactionRepository implements TransactionsRepository {
     userId: string,
   ): Promise<Prisma.TransactionUncheckedCreateInput> {
     data.userId = userId
-    const newTransaction = await prismaClient.transaction.create({ data })
-    return newTransaction
+    const transaction = await prismaClient.transaction.create({ data })
+
+    return transaction
   }
 
   async findMany(
     userId: string,
   ): Promise<Prisma.TransactionUncheckedCreateInput[]> {
-    const allTransactions = await prismaClient.transaction.findMany({
+    const transactions = await prismaClient.transaction.findMany({
       where: {
         userId,
       },
     })
-    return allTransactions
+
+    return transactions
   }
 
   async findById(
@@ -30,6 +32,7 @@ export class PrismaTransactionRepository implements TransactionsRepository {
     const transaction = await prismaClient.transaction.findUnique({
       where: { id, userId },
     })
+
     return transaction
   }
 
@@ -39,20 +42,22 @@ export class PrismaTransactionRepository implements TransactionsRepository {
     userId: string,
   ): Promise<Prisma.TransactionUncheckedCreateInput> {
     data.userId = userId
-    const updatedTransaction = await prismaClient.transaction.update({
+    const transaction = await prismaClient.transaction.update({
       where: { id, userId },
       data,
     })
-    return updatedTransaction
+
+    return transaction
   }
 
   async delete(
     id: string,
     userId: string,
   ): Promise<Prisma.TransactionUncheckedCreateInput> {
-    const deletedTransaction = await prismaClient.transaction.delete({
+    const transaction = await prismaClient.transaction.delete({
       where: { id, userId },
     })
-    return deletedTransaction
+
+    return transaction
   }
 }
