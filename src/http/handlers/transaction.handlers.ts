@@ -2,8 +2,10 @@ import type Elysia from "elysia";
 import { t } from "elysia";
 import type { Transaction } from "~/dto/transaction.dto";
 import { CategoryNotExistsError } from "~/errors/categories/category-not-exists.error";
+import { TransactionNotExistsError } from "~/errors/transaction/transaction-not-exists.error";
 import { UserNotExistsError } from "~/errors/users/user-not-exists.error";
 import { CreateTransactionUseCase } from "~/use-cases/transactions/create-transaction.useCase";
+import { GetTransactionById } from "~/use-cases/transactions/get-transaction-by-id.useCase";
 import { ListTransactionsUseCase } from "~/use-cases/transactions/list-transactions.useCase";
 
 export const transactionHttpHandlers = (app: Elysia) => {
@@ -116,7 +118,52 @@ export const transactionHttpHandlers = (app: Elysia) => {
             message: 'Entre em contato com o administrador'
           }
         }
+      }),
+
+    app.get('/transaction/:id', async ({ set, headers, params: { id: transactionId } }) => {
+      try {
+        set.status = 200
+
+        const userId = headers.sub
+
+        if (userId === undefined) throw new Error()
+
+        const userTransaction = await GetTransactionById.execute(Number(userId), transactionId)
+
+        return userTransaction
+
+      } catch (error) {
+
+        if (error instanceof UserNotExistsError) {
+          set.status = 404
+
+          return {
+            success: false,
+            message: error.message
+          }
+        }
+
+        if (error instanceof TransactionNotExistsError) {
+          return {
+            success: false,
+            message: error.message
+          }
+        }
+
+        set.status = 500
+
+        return {
+          success: false,
+          message: 'Entre em contato com o administrador'
+        }
+
+
+      }
+    }, {
+      params: t.Object({
+        id: t.Number()
       })
+    })
 
   return app
 }
