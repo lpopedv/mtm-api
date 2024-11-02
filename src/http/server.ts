@@ -6,6 +6,7 @@ import { env } from "~/env";
 import { categoryHttpHandlers } from "./handlers/category.handlers";
 import type { TokenPayload } from "~/use-cases/authentication/sessions.useCase";
 import { transactionHttpHandlers } from "./handlers/transaction.handlers";
+import { cardHttpHandlers } from "./handlers/card.handlers";
 
 const app = new Elysia()
   .use(authenticationHttpHandlers)
@@ -44,7 +45,8 @@ const app = new Elysia()
     (app) => (
       app.use(categoryHttpHandlers),
       app.use(userHttpHandlers),
-      app.use(transactionHttpHandlers)
+      app.use(transactionHttpHandlers),
+      app.use(cardHttpHandlers)
     )
   )
 
