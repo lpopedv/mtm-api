@@ -18,14 +18,15 @@ model User {
 
   categories   Category[]
   transactions Transaction[]
+  cards        Card[]
 
   @@map("users")
 }
 
 model Category {
   id         Int      @id @default(autoincrement())
-  title      String   @db.VarChar(150)
   user_id    Int
+  title      String   @db.VarChar(150)
   insertedAt DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
@@ -38,6 +39,7 @@ model Category {
 
 model Card {
   id             Int      @id @default(autoincrement())
+  user_id        Int
   title          String   @db.VarChar(150)
   limit          Float
   expirationDate DateTime
@@ -45,6 +47,7 @@ model Card {
   insertedAt     DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
+  user         User          @relation(fields: [user_id], references: [id])
   transactions Transaction[]
 
   @@map("cards")
