@@ -27,6 +27,7 @@ export const transactionHttpHandlers = (app: Elysia) => {
           value: body.value,
           date: body.date,
           is_recurring: body.is_recurring,
+          payment_date: body.payment_date,
           installments: body.installments
         }
 
@@ -74,6 +75,7 @@ export const transactionHttpHandlers = (app: Elysia) => {
         ]),
         value: t.Number(),
         date: t.String(),
+        payment_date: t.Optional(t.String()),
         is_recurring: t.Boolean(),
         installments: t.Optional(
           t.Array(

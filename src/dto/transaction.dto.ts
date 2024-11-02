@@ -9,6 +9,7 @@ export type Transaction = {
   value: number
   date: string
   is_recurring: boolean
+  payment_date?: string
   installment_count?: number
   installments?: Installment[]
 }

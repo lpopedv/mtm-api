@@ -29,6 +29,7 @@ export const execute = async (userId: number) => {
     type: transaction.type,
     value: transaction.value,
     date: transaction.date,
+    payment_date: transaction.payment_date,
     is_recurring: transaction.is_recurring,
     installment_count: transaction.installment_count,
   }))

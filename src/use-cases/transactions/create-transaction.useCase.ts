@@ -10,7 +10,7 @@ const execute = async (transaction: Transaction) => {
     }
   })
 
-  if (user === null) throw new UserNotExistsError(String(transaction.user_id))
+  if (user === null) throw new UserNotExistsError(transaction.user_id)
 
   const category = await prisma.category.findUnique({
     where: {
@@ -29,8 +29,9 @@ const execute = async (transaction: Transaction) => {
         type: transaction.type,
         value: transaction.value,
         date: new Date(transaction.date),
+        payment_date: transaction.payment_date ? new Date(transaction.payment_date) : undefined,
         is_recurring: transaction.is_recurring,
-        installment_count: 0
+        installment_count: undefined
       }
     })
   } else {
