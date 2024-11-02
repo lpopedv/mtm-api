@@ -23,6 +23,7 @@ export const execute = async (userId: number) => {
   })
 
   const userTransactions = transactions.map((transaction) => ({
+    id: transaction.id,
     title: transaction.title,
     category: transaction.category.title,
     type: transaction.type,
